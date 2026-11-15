@@ -1,0 +1,129 @@
+= ElkRb, in Rust
+
+image:https://img.shields.io/badge/license-BSD--2--Clause-blue.svg[License]
+
+== Purpose
+
+elkr is a Rust implementation of the Eclipse Layout Kernel (ELK) layout
+algorithms, ported from the pure-Ruby https://github.com/metanorma/elkrb[ElkRb].
+It computes positions and routes for node-link diagrams: the same ELK JSON
+interchange that elkjs and elkrb speak goes in, and a laid-out graph with
+node coordinates and edge sections comes out.
+
+The crate exists because layout is part of the reproducibility contract of
+https://github.com/etassia[Etassia's] rendering pipeline: the position of
+every node belongs to the byte-identity guarantee as much as the stroke of
+every edge. Layout here is therefore deterministic — the same input graph
+and options always produce the same coordinates — and versioned, so a
+layout change is a visible, pinned change.
+
+== Status
+
+`elkr 0.1.0` carries the first algorithm of the fifteen ElkRb implements:
+
+[cols="1,2,1"]
+|===
+|Algorithm |Description |Status
+
+|Layered (Sugiyama)
+|hierarchical diagrams with directed flow
+|v0.1 — cycle breaking (DFS), longest-path layering, barycenter crossing reduction, sequential coordinates, straight edge sections; directions RIGHT, LEFT, DOWN, UP
+
+|Force
+|organic, symmetric layouts using force simulation
+|planned
+
+|Stress
+|quality-focused layout with stress minimization
+|planned
+
+|Box
+|simple grid-based arrangement
+|planned
+
+|Fixed
+|preserve existing positions
+|planned
+
+|Random
+|random node placement (seeded, so still deterministic)
+|planned
+
+|MRTree
+|multi-rooted tree layout
+|planned
+
+|Radial
+|circular and radial node arrangement
+|planned
+
+|RectPacking
+|efficient rectangle packing
+|planned
+
+|TopdownPacking
+|grid-based treemap layout
+|planned
+
+|Libavoid
+|"A*" pathfinding connector routing
+|planned
+
+|VertiFlex
+|vertical flexible column layout
+|planned
+
+|DISCO
+|disconnected component layout
+|planned
+
+|SPOrE Overlap
+|overlap removal optimization
+|planned
+
+|SPOrE Compaction
+|whitespace compaction
+|planned
+|===
+
+Also on the roadmap, in pipeline order: hierarchical (nested) graphs, port
+constraints, edge labels and orthogonal routing, and the Diagram
+Interchange Model (DIM) adapter for the Etassia engine.
+
+== Usage
+
+The library:
+
+[source,rust]
+----
+let mut graph: elkr::ElkGraph = serde_json::from_str(&input)?;
+elkr::apply(&mut graph)?;              // honors elk.algorithm (default: layered)
+println!("{}", serde_json::to_string(&graph)?);
+----
+
+The command line:
+
+----
+elkr layout graph.json -o laid-out.json
+----
+
+Spacing follows the ELK options `elk.spacing.nodeNode` (default 20) and
+`elk.layered.spacing.nodeNodeBetweenLayers` (default 60); direction follows
+`elk.direction` (`RIGHT` by default). Unknown edge endpoints are errors;
+self loops are ignored by the layered layout.
+
+== Verification
+
+`cargo test` carries the semantic tests: longest-path layering on a
+diamond, spacing knobs, direction transpose and mirror, cycle reversal
+(sections keep the authored direction), and an elks-style JSON round trip.
+The determinism test asserts byte-identical output for repeated layouts of
+the same input.
+
+== Relationship to ElkRb
+
+elkrb is the pure-Ruby implementation this crate ports. The algorithms,
+option names, and the ELK JSON interchange match elkrb's semantics, and the
+two are expected to stay behaviorally aligned: a graph laid out by elkrb
+and by elkr under the same options converges as the ports mature, with the
+convergence proven by shared fixtures.
