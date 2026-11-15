@@ -1,5 +1,6 @@
 //! The layout algorithm surface: one trait, a registry by name.
 
+pub mod force;
 pub mod layered;
 
 use crate::elk::ElkGraph;
@@ -25,12 +26,14 @@ pub trait LayoutAlgorithm: Send + Sync {
 pub fn registry() -> std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgorithm>> {
     let mut m: std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgorithm>> =
         std::collections::BTreeMap::new();
+    m.insert("force", Box::new(force::Force));
     m.insert("layered", Box::new(layered::Layered));
     m
 }
 
 pub fn by_name(name: &str) -> Result<Box<dyn LayoutAlgorithm>, LayoutError> {
     match name {
+        "force" => Ok(Box::new(force::Force)),
         "layered" => Ok(Box::new(layered::Layered)),
         other => {
             let r = registry();
