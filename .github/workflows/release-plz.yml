@@ -10,10 +10,11 @@
 # crate's crates.io settings (repository etassia/elkr, workflow
 # release-plz.yml, no environment). There is no CARGO_REGISTRY_TOKEN secret.
 #
-# The release PR is created with GITHUB_TOKEN. It does not trigger CI on
-# itself (a deliberate GitHub restriction), which is acceptable here: the
-# release PR is the mechanical version bump, elkr has no branch protection,
-# and merging it triggers this workflow to publish.
+# Secret required (org level, visible to all repositories):
+#   ETASSIA_CI_PAT_TOKEN  — the etassia-ci PAT creates the release PR:
+#     the org's GitHub Actions cannot create PRs on elkr (the repository
+#     toggle is unavailable), and PRs created with GITHUB_TOKEN would not
+#     trigger CI on themselves anyway.
 
 name: Release-plz
 
@@ -54,5 +55,5 @@ jobs:
       - name: Run release-plz
         uses: MarcoIeni/release-plz-action@v0.5
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.ETASSIA_CI_PAT_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
