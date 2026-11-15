@@ -19,7 +19,8 @@ layout change is a visible, pinned change.
 
 == Status
 
-`elkr 0.1.0` carries the first algorithm of the fifteen ElkRb implements:
+`elkr 0.1.0` carries the first two of the fifteen algorithms ElkRb
+implements:
 
 [cols="1,2,1"]
 |===
@@ -31,7 +32,7 @@ layout change is a visible, pinned change.
 
 |Force
 |organic, symmetric layouts using force simulation
-|planned
+|v0.1 — Fruchterman-Reingold-style repulsion plus spring attraction with linear cooling; the initial scatter comes from a fixed-seed SplitMix64 stream, so the layout stays byte-identical where elkrb's `Kernel#rand` scatter cannot; options `iterations`, `repulsion`, `temperature` (with `elk.force.*` aliases); preset node positions are preserved as the simulation start; edges route straight, center to center
 
 |Stress
 |quality-focused layout with stress minimization
@@ -116,9 +117,11 @@ self loops are ignored by the layered layout.
 
 `cargo test` carries the semantic tests: longest-path layering on a
 diamond, spacing knobs, direction transpose and mirror, cycle reversal
-(sections keep the authored direction), and an elks-style JSON round trip.
-The determinism test asserts byte-identical output for repeated layouts of
-the same input.
+(sections keep the authored direction), an elks-style JSON round trip, and
+the force simulation's invariants — the scatter bounds, preset-position
+preservation, connected nodes converging closer than unconnected ones,
+center-to-center routing, and byte-identical determinism. The determinism
+test asserts byte-identical output for repeated layouts of the same input.
 
 == Relationship to ElkRb
 
