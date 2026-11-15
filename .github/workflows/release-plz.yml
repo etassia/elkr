@@ -4,19 +4,23 @@
 # conventional commits, opens the release PR (merging it is the release
 # decision), and publishes the touched publishable crates to crates.io.
 #
-# Secrets required (repository settings):
-#   ETASSIA_CI_PAT_TOKEN  — PAT with repo scope; PRs created with GITHUB_TOKEN
-#                           do not trigger CI on themselves
-#   CARGO_REGISTRY_TOKEN  — crates.io token
+# Publishing authenticates through crates.io Trusted Publishing (RFC 3691):
+# the workflow's OIDC token is exchanged for a 30-minute registry token by
+# rust-lang/crates-io-auth-action, matched against the registration in the
+# crate's crates.io settings (repository etassia/elkr, workflow
+# release-plz.yml, no environment). There is no CARGO_REGISTRY_TOKEN secret.
 #
-# elkr has a single publishable crate; the registry dependency graph is
-# small, so releases are frequent and mechanical.
+# Optional secret (repository settings):
+#   ETASSIA_CI_PAT_TOKEN  — PAT with repo scope; falls back to GITHUB_TOKEN.
+#     PRs created with GITHUB_TOKEN do not trigger CI on themselves, which
+#     is acceptable for the mechanical release PR.
 
 name: Release-plz
 
 permissions:
   pull-requests: write
   contents: write
+  id-token: write
 
 on:
   push:
@@ -43,8 +47,12 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Exchange the OIDC token for a crates.io publish token
+        uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
       - name: Run release-plz
         uses: MarcoIeni/release-plz-action@v0.5
         env:
-          GITHUB_TOKEN: ${{ secrets.ETASSIA_CI_PAT_TOKEN }}
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ETASSIA_CI_PAT_TOKEN || github.token }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
