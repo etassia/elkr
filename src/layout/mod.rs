@@ -1,9 +1,88 @@
 //! The layout algorithm surface: one trait, a registry by name.
 
+pub mod box_layout;
+pub mod fixed;
 pub mod force;
 pub mod layered;
+pub mod random;
 
-use crate::elk::ElkGraph;
+use crate::elk::{EdgeSection, ElkGraph, Point};
+use std::collections::BTreeMap;
+
+/// elkrb's padding: every algorithm shifts its result so the bounding
+/// box starts here.
+pub(crate) const PADDING: f64 = 12.0;
+
+/// SplitMix64: the fixed-seed stream that stands in for elkrb's
+/// `Kernel#rand`, so scattered layouts are identical on every run.
+pub(crate) struct Scatter(pub u64);
+
+impl Scatter {
+    pub fn next_unit(&mut self) -> f64 {
+        self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
+        let mut z = self.0;
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        z ^= z >> 31;
+        ((z >> 11) as f64) / (1u64 << 53) as f64
+    }
+}
+
+/// elkrb's `apply_padding`: shift the laid-out nodes so the bounding
+/// box starts at (PADDING, PADDING).
+pub(crate) fn apply_padding(graph: &mut ElkGraph) {
+    if graph.children.is_empty() {
+        return;
+    }
+    let min_x = graph
+        .children
+        .iter()
+        .map(|n| n.x.unwrap_or(0.0))
+        .fold(f64::INFINITY, f64::min);
+    let min_y = graph
+        .children
+        .iter()
+        .map(|n| n.y.unwrap_or(0.0))
+        .fold(f64::INFINITY, f64::min);
+    for node in &mut graph.children {
+        node.x = Some(node.x.unwrap_or(0.0) - min_x + PADDING);
+        node.y = Some(node.y.unwrap_or(0.0) - min_y + PADDING);
+    }
+}
+
+/// elkrb's default edge routing: straight sections, center to center.
+/// Unknown endpoints error; self loops skip.
+pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError> {
+    let index_of: BTreeMap<String, usize> = graph
+        .children
+        .iter()
+        .enumerate()
+        .map(|(i, n)| (n.id.clone(), i))
+        .collect();
+    for e in graph.edges.iter_mut() {
+        let (Some(src), Some(tgt)) = (e.sources.first(), e.targets.first()) else {
+            continue;
+        };
+        if src == tgt {
+            continue;
+        }
+        let sn = &graph.children[index_of[src.as_str()]];
+        let tn = &graph.children[index_of[tgt.as_str()]];
+        let center = |n: &crate::elk::ElkNode| Point {
+            x: n.x.unwrap_or(0.0) + n.width.unwrap_or(crate::elk::DEFAULT_NODE_WIDTH) / 2.0,
+            y: n.y.unwrap_or(0.0) + n.height.unwrap_or(crate::elk::DEFAULT_NODE_HEIGHT) / 2.0,
+        };
+        e.sections.push(EdgeSection {
+            id: format!("{}_section", e.id),
+            start_point: center(sn),
+            end_point: center(tn),
+            bend_points: Vec::new(),
+            incoming_shape: Some(sn.id.clone()),
+            outgoing_shape: Some(tn.id.clone()),
+        });
+    }
+    Ok(())
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum LayoutError {
@@ -26,15 +105,21 @@ pub trait LayoutAlgorithm: Send + Sync {
 pub fn registry() -> std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgorithm>> {
     let mut m: std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgorithm>> =
         std::collections::BTreeMap::new();
+    m.insert("box", Box::new(box_layout::BoxLayout));
+    m.insert("fixed", Box::new(fixed::Fixed));
     m.insert("force", Box::new(force::Force));
     m.insert("layered", Box::new(layered::Layered));
+    m.insert("random", Box::new(random::Random));
     m
 }
 
 pub fn by_name(name: &str) -> Result<Box<dyn LayoutAlgorithm>, LayoutError> {
     match name {
+        "box" => Ok(Box::new(box_layout::BoxLayout)),
+        "fixed" => Ok(Box::new(fixed::Fixed)),
         "force" => Ok(Box::new(force::Force)),
         "layered" => Ok(Box::new(layered::Layered)),
+        "random" => Ok(Box::new(random::Random)),
         other => {
             let r = registry();
             Err(LayoutError::UnknownAlgorithm(
