@@ -4,6 +4,7 @@ pub mod box_layout;
 pub mod disco;
 pub mod fixed;
 pub mod force;
+pub mod hierarchical;
 pub mod layered;
 pub mod libavoid;
 pub mod mrtree;
