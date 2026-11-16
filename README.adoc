@@ -109,7 +109,14 @@ The command line:
 
 ----
 elkr layout graph.json -o laid-out.json
+elkr dim document.json -o laid-out.json     # a DIM 0.1 document
 ----
+
+The DIM adapter takes a Diagram Interchange Model 0.1 document, lays
+out its embedded graph with the document's own layoutOptions, and
+merges the positions and edge sections back in — every field the
+engine does not speak (content blocks, style, notation) rides through
+untouched.
 
 Spacing follows the ELK options `elk.spacing.nodeNode` (default 20) and
 `elk.layered.spacing.nodeNodeBetweenLayers` (default 60); direction follows

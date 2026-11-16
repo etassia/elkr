@@ -6,6 +6,7 @@
 //! input graph and options always produce the same coordinates, which is
 //! the property Etassia's byte-identity contract depends on.
 
+pub mod dim;
 pub mod elk;
 pub mod layout;
 
