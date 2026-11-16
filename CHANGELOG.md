@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.0 (2026-11-16)
+
+### Features
+
+- The pipeline is complete: ports (side detection, index ordering,
+  even distribution, port-anchored sections), hierarchical (nested)
+  graphs under layered, per-edge orthogonal routing, the edge label
+  pass (arc-length midpoint placement, stacked), and the DIM adapter
+  (`elkr dim`) by @ronaldtse
+
+### Breaking
+
+- ElkNode carries ports, ElkEdge carries labels and layout options,
+  and ElkLabel carries width and height: exhaustive struct
+  initializers must add the new fields (semver-checks flagged the
+  additions as breaking for that reason) by @ronaldtse
+
 ## 0.1.2 (2026-11-16)
 
 ### Features
