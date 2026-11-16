@@ -69,6 +69,10 @@ layout change is a visible, pinned change.
 |"A*" pathfinding connector routing
 |v0.1 — orthogonal A* over the nodes inflated by libavoid.routingPadding (10), segment and bend penalties, visibility simplification; faithful to elkrb, whose paths start inside their own obstacle and so fall back to the direct route
 
+|Edge routing and labels
+|orthogonal bends and edge label placement
+|v0.1 — per-edge `edge.routing: orthogonal` (elkrb's midpoint bends), and the label pass: each edge label centers on the route's arc-length midpoint and stacks above the line, elkrb CENTER semantics
+
 |Ports
 |fixed connection points on node boundaries
 |v0.1 — side detection, index ordering, even distribution, and port-anchored edge sections (layered and straight routing); elkrb PortConstraintProcessor semantics
@@ -90,9 +94,9 @@ layout change is a visible, pinned change.
 |v0.1 — sweeps along spore.compactionDirection (both), each node pulled to the boundary its overlapping predecessors allow plus spore.nodeSpacing 10; unblocked nodes ride to the origin, faithful to elkrb
 |===
 
-Also on the roadmap, in pipeline order: hierarchical (nested) graphs,
-edge labels and orthogonal routing, and the Diagram Interchange Model
-(DIM) adapter for the Etassia engine. Ports shipped in 0.1.2.
+Also on the roadmap, in pipeline order: hierarchical (nested) graphs.
+Ports, orthogonal edge routing, edge label placement, and the DIM
+adapter shipped in 0.1.2.
 
 == Usage
 

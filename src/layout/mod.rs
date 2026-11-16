@@ -11,6 +11,7 @@ pub mod ports;
 pub mod radial;
 pub mod random;
 pub mod rectpacking;
+pub mod routing;
 pub mod spore_compaction;
 pub mod spore_overlap;
 pub mod stress;
@@ -106,14 +107,20 @@ pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError>
         let end = ports::port_anchor(tn, tgt)
             .map(|(x, y)| Point { x, y })
             .unwrap_or_else(|| center(tn));
+        let bends = if routing::orthogonal(e) {
+            routing::orthogonal_bends(start, end)
+        } else {
+            Vec::new()
+        };
         e.sections.push(EdgeSection {
             id: format!("{}_section", e.id),
             start_point: start,
             end_point: end,
-            bend_points: Vec::new(),
+            bend_points: bends,
             incoming_shape: Some(sn.id.clone()),
             outgoing_shape: Some(tn.id.clone()),
         });
+        routing::place_labels(e);
     }
     Ok(())
 }

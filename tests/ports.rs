@@ -35,6 +35,8 @@ fn edge(id: &str, src: &str, tgt: &str) -> ElkEdge {
         sources: vec![src.to_string()],
         targets: vec![tgt.to_string()],
         sections: Vec::new(),
+        labels: Vec::new(),
+        layout_options: Default::default(),
     }
 }
 
