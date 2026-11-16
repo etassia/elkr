@@ -4,7 +4,11 @@ pub mod box_layout;
 pub mod fixed;
 pub mod force;
 pub mod layered;
+pub mod radial;
 pub mod random;
+pub mod rectpacking;
+pub mod topdownpacking;
+pub mod vertiflex;
 
 use crate::elk::{EdgeSection, ElkGraph, Point};
 use std::collections::BTreeMap;
@@ -51,7 +55,8 @@ pub(crate) fn apply_padding(graph: &mut ElkGraph) {
 }
 
 /// elkrb's default edge routing: straight sections, center to center.
-/// Unknown endpoints error; self loops skip.
+/// Edges whose endpoints are not on the flat surface skip, as elkrb's
+/// EdgeRouter does; self loops skip.
 pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError> {
     let index_of: BTreeMap<String, usize> = graph
         .children
@@ -66,8 +71,12 @@ pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError>
         if src == tgt {
             continue;
         }
-        let sn = &graph.children[index_of[src.as_str()]];
-        let tn = &graph.children[index_of[tgt.as_str()]];
+        let (Some(&si), Some(&ti)) = (index_of.get(src.as_str()), index_of.get(tgt.as_str()))
+        else {
+            continue;
+        };
+        let sn = &graph.children[si];
+        let tn = &graph.children[ti];
         let center = |n: &crate::elk::ElkNode| Point {
             x: n.x.unwrap_or(0.0) + n.width.unwrap_or(crate::elk::DEFAULT_NODE_WIDTH) / 2.0,
             y: n.y.unwrap_or(0.0) + n.height.unwrap_or(crate::elk::DEFAULT_NODE_HEIGHT) / 2.0,
@@ -109,7 +118,11 @@ pub fn registry() -> std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgo
     m.insert("fixed", Box::new(fixed::Fixed));
     m.insert("force", Box::new(force::Force));
     m.insert("layered", Box::new(layered::Layered));
+    m.insert("radial", Box::new(radial::Radial));
     m.insert("random", Box::new(random::Random));
+    m.insert("rectpacking", Box::new(rectpacking::RectPacking));
+    m.insert("topdownpacking", Box::new(topdownpacking::TopdownPacking));
+    m.insert("vertiflex", Box::new(vertiflex::VertiFlex));
     m
 }
 
@@ -119,7 +132,11 @@ pub fn by_name(name: &str) -> Result<Box<dyn LayoutAlgorithm>, LayoutError> {
         "fixed" => Ok(Box::new(fixed::Fixed)),
         "force" => Ok(Box::new(force::Force)),
         "layered" => Ok(Box::new(layered::Layered)),
+        "radial" => Ok(Box::new(radial::Radial)),
         "random" => Ok(Box::new(random::Random)),
+        "rectpacking" => Ok(Box::new(rectpacking::RectPacking)),
+        "topdownpacking" => Ok(Box::new(topdownpacking::TopdownPacking)),
+        "vertiflex" => Ok(Box::new(vertiflex::VertiFlex)),
         other => {
             let r = registry();
             Err(LayoutError::UnknownAlgorithm(

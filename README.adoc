@@ -19,7 +19,7 @@ layout change is a visible, pinned change.
 
 == Status
 
-`elkr 0.1.1` carries five of the fifteen algorithms ElkRb implements:
+`elkr 0.1.1` carries nine of the fifteen algorithms ElkRb implements:
 
 [cols="1,2,1"]
 |===
@@ -55,15 +55,15 @@ layout change is a visible, pinned change.
 
 |Radial
 |circular and radial node arrangement
-|planned
+|v0.1 — even angles on one circle; the radius fits the circumference on the average node size (times 1.2 of slack, never under 100); nodes centered on their points
 
 |RectPacking
 |efficient rectangle packing
-|planned
+|v0.1 — shelf packing, tallest first, the 80 percent uniformity rule; faithful to elkrb, where the tallest-first order keeps the whole graph on one shelf
 
 |TopdownPacking
 |grid-based treemap layout
-|planned
+|v0.1 — cols = ceil(sqrt(n)), uniform cells from topdownpacking.nodeWidth or the average dimensions shaped by topdownpacking.aspectRatio (1.0); every node takes the cell size
 
 |Libavoid
 |"A*" pathfinding connector routing
@@ -71,7 +71,7 @@ layout change is a visible, pinned change.
 
 |VertiFlex
 |vertical flexible column layout
-|planned
+|v0.1 — round-robin columns (vertiflex.columnCount 3, balanceColumns on), column widths flexing to the widest node; vertiflex.columnSpacing 50, vertiflex.verticalSpacing 30 overridden by elk.spacing.nodeNode. One deliberate deviation: balanceColumns parses as a boolean, where elkrb reads the Ruby string in which "false" is truthy
 
 |DISCO
 |disconnected component layout
