@@ -1,13 +1,17 @@
 //! The layout algorithm surface: one trait, a registry by name.
 
 pub mod box_layout;
+pub mod disco;
 pub mod fixed;
 pub mod force;
 pub mod layered;
+pub mod libavoid;
 pub mod mrtree;
 pub mod radial;
 pub mod random;
 pub mod rectpacking;
+pub mod spore_compaction;
+pub mod spore_overlap;
 pub mod stress;
 pub mod topdownpacking;
 pub mod vertiflex;
@@ -117,13 +121,20 @@ pub fn registry() -> std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgo
     let mut m: std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgorithm>> =
         std::collections::BTreeMap::new();
     m.insert("box", Box::new(box_layout::BoxLayout));
+    m.insert("disco", Box::new(disco::Disco));
     m.insert("fixed", Box::new(fixed::Fixed));
     m.insert("force", Box::new(force::Force));
     m.insert("layered", Box::new(layered::Layered));
+    m.insert("libavoid", Box::new(libavoid::Libavoid));
     m.insert("mrtree", Box::new(mrtree::MRTree));
     m.insert("radial", Box::new(radial::Radial));
     m.insert("random", Box::new(random::Random));
     m.insert("rectpacking", Box::new(rectpacking::RectPacking));
+    m.insert(
+        "spore-compaction",
+        Box::new(spore_compaction::SporeCompaction),
+    );
+    m.insert("spore-overlap", Box::new(spore_overlap::SporeOverlap));
     m.insert("stress", Box::new(stress::Stress));
     m.insert("topdownpacking", Box::new(topdownpacking::TopdownPacking));
     m.insert("vertiflex", Box::new(vertiflex::VertiFlex));
@@ -133,13 +144,17 @@ pub fn registry() -> std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgo
 pub fn by_name(name: &str) -> Result<Box<dyn LayoutAlgorithm>, LayoutError> {
     match name {
         "box" => Ok(Box::new(box_layout::BoxLayout)),
+        "disco" => Ok(Box::new(disco::Disco)),
         "fixed" => Ok(Box::new(fixed::Fixed)),
         "force" => Ok(Box::new(force::Force)),
         "layered" => Ok(Box::new(layered::Layered)),
+        "libavoid" => Ok(Box::new(libavoid::Libavoid)),
         "mrtree" => Ok(Box::new(mrtree::MRTree)),
         "radial" => Ok(Box::new(radial::Radial)),
         "random" => Ok(Box::new(random::Random)),
         "rectpacking" => Ok(Box::new(rectpacking::RectPacking)),
+        "spore-compaction" => Ok(Box::new(spore_compaction::SporeCompaction)),
+        "spore-overlap" => Ok(Box::new(spore_overlap::SporeOverlap)),
         "stress" => Ok(Box::new(stress::Stress)),
         "topdownpacking" => Ok(Box::new(topdownpacking::TopdownPacking)),
         "vertiflex" => Ok(Box::new(vertiflex::VertiFlex)),
