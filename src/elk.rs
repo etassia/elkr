@@ -10,6 +10,8 @@ use std::collections::BTreeMap;
 
 pub const DEFAULT_NODE_SPACING: f64 = 20.0;
 pub const DEFAULT_LAYER_SPACING: f64 = 60.0;
+pub const DEFAULT_NODE_WIDTH: f64 = 40.0;
+pub const DEFAULT_NODE_HEIGHT: f64 = 40.0;
 
 /// A layout-option map: ELK option keys to string values.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]

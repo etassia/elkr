@@ -19,8 +19,7 @@ layout change is a visible, pinned change.
 
 == Status
 
-`elkr 0.1.0` carries the first two of the fifteen algorithms ElkRb
-implements:
+`elkr 0.1.1` carries five of the fifteen algorithms ElkRb implements:
 
 [cols="1,2,1"]
 |===
@@ -34,20 +33,20 @@ implements:
 |organic, symmetric layouts using force simulation
 |v0.1 — Fruchterman-Reingold-style repulsion plus spring attraction with linear cooling; the initial scatter comes from a fixed-seed SplitMix64 stream, so the layout stays byte-identical where elkrb's `Kernel#rand` scatter cannot; options `iterations`, `repulsion`, `temperature` (with `elk.force.*` aliases); preset node positions are preserved as the simulation start; edges route straight, center to center
 
-|Stress
-|quality-focused layout with stress minimization
-|planned
-
 |Box
 |simple grid-based arrangement
-|planned
+|v0.1 — uniform grid, rows first, cells sized by the largest node; `aspect_ratio` (1.6) sets the column count
 
 |Fixed
 |preserve existing positions
-|planned
+|v0.1 — absent coordinates become the origin and the result shifts onto the padding
 
 |Random
 |random node placement (seeded, so still deterministic)
+|v0.1 — the padded-area bounds from elkrb with `aspect_ratio` (1.6); the scatter draws from the shared fixed-seed SplitMix64 stream
+
+|Stress
+|quality-focused layout with stress minimization
 |planned
 
 |MRTree

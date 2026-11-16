@@ -17,7 +17,7 @@
 //! `repulsion` / `elk.force.repulsion` (5.0), `temperature` /
 //! `elk.force.temperature` (0.001).
 
-use super::{LayoutAlgorithm, LayoutError};
+use super::{LayoutAlgorithm, LayoutError, Scatter};
 use crate::elk::{EdgeSection, ElkGraph, Point};
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -31,21 +31,6 @@ const PADDING: f64 = 12.0;
 const DEFAULT_NODE_WIDTH: f64 = 40.0;
 const DEFAULT_NODE_HEIGHT: f64 = 40.0;
 const SCATTER_SEED: u64 = 0x2545_F491_4F6C_DD1D;
-
-/// SplitMix64: a fixed-seed stream stands in for elkrb's `Kernel#rand`,
-/// so the initial scatter is identical on every run and every platform.
-struct Scatter(u64);
-
-impl Scatter {
-    fn next_unit(&mut self) -> f64 {
-        self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
-        let mut z = self.0;
-        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-        z ^= z >> 31;
-        ((z >> 11) as f64) / (1u64 << 53) as f64
-    }
-}
 
 fn option<T: FromStr>(graph: &ElkGraph, bare: &str, elk: &str) -> Option<T> {
     graph
