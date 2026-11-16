@@ -1,6 +1,6 @@
 [package]
 name = "elkr"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 description = "Deterministic graph layout: a Rust implementation of the Eclipse Layout Kernel algorithms, ported from metanorma/elkrb"
 license = "BSD-2-Clause"
