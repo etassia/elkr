@@ -39,6 +39,15 @@ impl LayoutAlgorithm for Layered {
     }
 
     fn layout(&self, graph: &mut ElkGraph) -> Result<(), LayoutError> {
+        if super::hierarchical::is_hierarchical(graph) {
+            return super::hierarchical::run(&|g| self.layout_flat(g), graph);
+        }
+        self.layout_flat(graph)
+    }
+}
+
+impl Layered {
+    fn layout_flat(&self, graph: &mut ElkGraph) -> Result<(), LayoutError> {
         let direction = graph.layout_options.direction();
         let node_spacing = graph.layout_options.node_spacing();
         let layer_spacing = graph.layout_options.layer_spacing();
