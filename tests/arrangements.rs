@@ -223,8 +223,7 @@ fn topdownpacking_builds_a_uniform_square_grid() {
         "topdownpacking",
         (0..9).map(|i| node(&format!("n{i}"), 40.0, 40.0)).collect(),
     );
-    for i in 0..9 {
-        let n = &g.children[i];
+    for n in &g.children {
         assert_eq!((n.width, n.height), (Some(40.0), Some(40.0)));
     }
     assert_eq!(at(&g, "n0"), (12.0, 12.0));
