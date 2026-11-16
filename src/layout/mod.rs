@@ -7,6 +7,7 @@ pub mod force;
 pub mod layered;
 pub mod libavoid;
 pub mod mrtree;
+pub mod ports;
 pub mod radial;
 pub mod random;
 pub mod rectpacking;
@@ -70,6 +71,18 @@ pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError>
         .enumerate()
         .map(|(i, n)| (n.id.clone(), i))
         .collect();
+    let port_of: std::collections::BTreeMap<String, usize> = graph
+        .children
+        .iter()
+        .enumerate()
+        .flat_map(|(i, n)| n.ports.iter().map(move |p| (p.id.clone(), i)))
+        .collect();
+    let resolve = |endpoint: &str| -> Option<usize> {
+        index_of
+            .get(endpoint)
+            .copied()
+            .or_else(|| port_of.get(endpoint).copied())
+    };
     for e in graph.edges.iter_mut() {
         let (Some(src), Some(tgt)) = (e.sources.first(), e.targets.first()) else {
             continue;
@@ -77,8 +90,7 @@ pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError>
         if src == tgt {
             continue;
         }
-        let (Some(&si), Some(&ti)) = (index_of.get(src.as_str()), index_of.get(tgt.as_str()))
-        else {
+        let (Some(si), Some(ti)) = (resolve(src), resolve(tgt)) else {
             continue;
         };
         let sn = &graph.children[si];
@@ -87,10 +99,17 @@ pub(crate) fn straight_sections(graph: &mut ElkGraph) -> Result<(), LayoutError>
             x: n.x.unwrap_or(0.0) + n.width.unwrap_or(crate::elk::DEFAULT_NODE_WIDTH) / 2.0,
             y: n.y.unwrap_or(0.0) + n.height.unwrap_or(crate::elk::DEFAULT_NODE_HEIGHT) / 2.0,
         };
+        // an endpoint naming one of the node's ports anchors there
+        let start = ports::port_anchor(sn, src)
+            .map(|(x, y)| Point { x, y })
+            .unwrap_or_else(|| center(sn));
+        let end = ports::port_anchor(tn, tgt)
+            .map(|(x, y)| Point { x, y })
+            .unwrap_or_else(|| center(tn));
         e.sections.push(EdgeSection {
             id: format!("{}_section", e.id),
-            start_point: center(sn),
-            end_point: center(tn),
+            start_point: start,
+            end_point: end,
             bend_points: Vec::new(),
             incoming_shape: Some(sn.id.clone()),
             outgoing_shape: Some(tn.id.clone()),
@@ -172,12 +191,21 @@ pub fn by_name(name: &str) -> Result<Box<dyn LayoutAlgorithm>, LayoutError> {
 }
 
 /// Apply the algorithm named in the graph's `elk.algorithm` option
-/// (default: `layered`, the ELK default too).
+/// (default: `layered`, the ELK default too), after the port
+/// constraint pre-pass.
 pub fn apply(graph: &mut ElkGraph) -> Result<(), LayoutError> {
     let name = graph
         .layout_options
         .get("elk.algorithm")
-        .map(String::as_str)
-        .unwrap_or("layered");
+        .cloned()
+        .unwrap_or_else(|| "layered".to_string());
+    run(&name, graph)
+}
+
+/// Run the named algorithm after the port constraint pre-pass —
+/// elkrb's pipeline order, exposed so callers bypassing `apply` keep
+/// the same behavior.
+pub fn run(name: &str, graph: &mut ElkGraph) -> Result<(), LayoutError> {
+    ports::apply_port_constraints(graph);
     by_name(name)?.layout(graph)
 }
