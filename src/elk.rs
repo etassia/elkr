@@ -97,6 +97,34 @@ pub struct ElkNode {
     pub children: Vec<ElkNode>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub labels: Vec<ElkLabel>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ports: Vec<ElkPort>,
+}
+
+/// A fixed connection point on a node's boundary. The side may stay
+/// undefined; the constraint pass detects it from the position.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ElkPort {
+    pub id: String,
+    pub x: f64,
+    pub y: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+    #[serde(default = "default_port_side")]
+    pub side: String,
+    #[serde(default = "default_port_index")]
+    pub index: i64,
+}
+
+fn default_port_side() -> String {
+    "UNDEFINED".to_string()
+}
+
+fn default_port_index() -> i64 {
+    -1
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

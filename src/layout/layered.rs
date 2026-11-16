@@ -68,18 +68,18 @@ impl LayoutAlgorithm for Layered {
             if src == tgt {
                 continue;
             }
-            let si = *index_of
-                .get(src.as_str())
-                .ok_or_else(|| LayoutError::UnknownNode {
+            let si = super::ports::endpoint_node(graph, &index_of, src).ok_or_else(|| {
+                LayoutError::UnknownNode {
                     edge: e.id.clone(),
                     node: src.clone(),
-                })?;
-            let ti = *index_of
-                .get(tgt.as_str())
-                .ok_or_else(|| LayoutError::UnknownNode {
+                }
+            })?;
+            let ti = super::ports::endpoint_node(graph, &index_of, tgt).ok_or_else(|| {
+                LayoutError::UnknownNode {
                     edge: e.id.clone(),
                     node: tgt.clone(),
-                })?;
+                }
+            })?;
             edges.push((si, ti));
         }
 
@@ -249,6 +249,18 @@ impl LayoutAlgorithm for Layered {
         }
 
         // ---- edge sections: straight, between direction anchors ----
+        let port_of: BTreeMap<&str, usize> = graph
+            .children
+            .iter()
+            .enumerate()
+            .flat_map(|(i, n)| n.ports.iter().map(move |p| (p.id.as_str(), i)))
+            .collect();
+        let resolve = |endpoint: &str| -> Option<usize> {
+            index_of
+                .get(endpoint)
+                .copied()
+                .or_else(|| port_of.get(endpoint).copied())
+        };
         for e in graph.edges.iter_mut() {
             let (Some(src), Some(tgt)) = (e.sources.first(), e.targets.first()) else {
                 continue;
@@ -256,8 +268,9 @@ impl LayoutAlgorithm for Layered {
             if src == tgt {
                 continue;
             }
-            let si = index_of[src.as_str()];
-            let ti = index_of[tgt.as_str()];
+            let (Some(si), Some(ti)) = (resolve(src), resolve(tgt)) else {
+                continue;
+            };
             let start = anchor(
                 &nodes[si],
                 along_of[si],
@@ -274,6 +287,13 @@ impl LayoutAlgorithm for Layered {
                 mirror,
                 true,
             );
+            // ports win over the side anchors when the edge names them
+            let start = super::ports::port_anchor(&graph.children[si], src)
+                .map(|(x, y)| Point { x, y })
+                .unwrap_or(start);
+            let end = super::ports::port_anchor(&graph.children[ti], tgt)
+                .map(|(x, y)| Point { x, y })
+                .unwrap_or(end);
             e.sections.push(EdgeSection {
                 id: format!("{}_section", e.id),
                 start_point: start,

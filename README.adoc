@@ -69,6 +69,10 @@ layout change is a visible, pinned change.
 |"A*" pathfinding connector routing
 |v0.1 — orthogonal A* over the nodes inflated by libavoid.routingPadding (10), segment and bend penalties, visibility simplification; faithful to elkrb, whose paths start inside their own obstacle and so fall back to the direct route
 
+|Ports
+|fixed connection points on node boundaries
+|v0.1 — side detection, index ordering, even distribution, and port-anchored edge sections (layered and straight routing); elkrb PortConstraintProcessor semantics
+
 |VertiFlex
 |vertical flexible column layout
 |v0.1 — round-robin columns (vertiflex.columnCount 3, balanceColumns on), column widths flexing to the widest node; vertiflex.columnSpacing 50, vertiflex.verticalSpacing 30 overridden by elk.spacing.nodeNode. One deliberate deviation: balanceColumns parses as a boolean, where elkrb reads the Ruby string in which "false" is truthy
@@ -86,9 +90,9 @@ layout change is a visible, pinned change.
 |v0.1 — sweeps along spore.compactionDirection (both), each node pulled to the boundary its overlapping predecessors allow plus spore.nodeSpacing 10; unblocked nodes ride to the origin, faithful to elkrb
 |===
 
-Also on the roadmap, in pipeline order: hierarchical (nested) graphs, port
-constraints, edge labels and orthogonal routing, and the Diagram
-Interchange Model (DIM) adapter for the Etassia engine.
+Also on the roadmap, in pipeline order: hierarchical (nested) graphs,
+edge labels and orthogonal routing, and the Diagram Interchange Model
+(DIM) adapter for the Etassia engine. Ports shipped in 0.1.2.
 
 == Usage
 

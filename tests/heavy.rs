@@ -17,6 +17,7 @@ fn node(id: &str, w: f64, h: f64) -> ElkNode {
         height: Some(h),
         children: Vec::new(),
         labels: Vec::new(),
+        ports: Vec::new(),
     }
 }
 
