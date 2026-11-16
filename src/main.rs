@@ -8,6 +8,7 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let mut output: Option<String> = None;
     let mut input: Option<String> = None;
+    let mut command = String::from("layout");
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -19,6 +20,9 @@ fn main() {
             "-h" | "--help" => {
                 print_help();
                 return;
+            }
+            "layout" | "dim" if input.is_none() && output.is_none() => {
+                command = arg.to_string();
             }
             other => {
                 if input.is_none() {
@@ -49,24 +53,32 @@ fn main() {
         },
     };
 
-    let mut graph: elkr::ElkGraph = match serde_json::from_str(&source) {
-        Ok(g) => g,
-        Err(e) => {
-            eprintln!("elkr: invalid ELK JSON: {e}");
+    let out = if command == "dim" {
+        match elkr::dim::layout_document(&source) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("elkr: {e}");
+                std::process::exit(1);
+            }
+        }
+    } else {
+        let mut graph: elkr::ElkGraph = match serde_json::from_str(&source) {
+            Ok(g) => g,
+            Err(e) => {
+                eprintln!("elkr: invalid ELK JSON: {e}");
+                std::process::exit(1);
+            }
+        };
+        if let Err(e) = elkr::apply(&mut graph) {
+            eprintln!("elkr: {e}");
             std::process::exit(1);
         }
-    };
-
-    if let Err(e) = elkr::apply(&mut graph) {
-        eprintln!("elkr: {e}");
-        std::process::exit(1);
-    }
-
-    let out = match serde_json::to_string_pretty(&graph) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("elkr: cannot serialize: {e}");
-            std::process::exit(1);
+        match serde_json::to_string_pretty(&graph) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("elkr: cannot serialize: {e}");
+                std::process::exit(1);
+            }
         }
     };
 
@@ -87,6 +99,7 @@ fn print_help() {
 
 USAGE:
     elkr layout [INPUT] [-o OUTPUT]
+    elkr dim [INPUT] [-o OUTPUT]
 
     INPUT is an ELK JSON graph file, or '-' (default) for stdin.
     OUTPUT is the laid-out graph file, or '-' (default) for stdout.
