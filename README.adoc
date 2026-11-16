@@ -19,7 +19,7 @@ layout change is a visible, pinned change.
 
 == Status
 
-`elkr 0.1.1` carries nine of the fifteen algorithms ElkRb implements:
+`elkr 0.1.1` carries eleven of the fifteen algorithms ElkRb implements:
 
 [cols="1,2,1"]
 |===
@@ -47,11 +47,11 @@ layout change is a visible, pinned change.
 
 |Stress
 |quality-focused layout with stress minimization
-|planned
+|v0.1 — stress majorization over the hop-count matrix (Floyd-Warshall, edges 1.0), circular start, epsilon 0.0001 convergence, iterations 500; unconnected pairs pull on nothing
 
 |MRTree
 |multi-rooted tree layout
-|planned
+|v0.1 — trees from the nodes no edge points at, leaves at their slots, parents centered over children, levels 80 apart; a placed node is never re-added, so cycles terminate (elkrb recurses forever)
 
 |Radial
 |circular and radial node arrangement

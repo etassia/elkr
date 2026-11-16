@@ -4,9 +4,11 @@ pub mod box_layout;
 pub mod fixed;
 pub mod force;
 pub mod layered;
+pub mod mrtree;
 pub mod radial;
 pub mod random;
 pub mod rectpacking;
+pub mod stress;
 pub mod topdownpacking;
 pub mod vertiflex;
 
@@ -118,9 +120,11 @@ pub fn registry() -> std::collections::BTreeMap<&'static str, Box<dyn LayoutAlgo
     m.insert("fixed", Box::new(fixed::Fixed));
     m.insert("force", Box::new(force::Force));
     m.insert("layered", Box::new(layered::Layered));
+    m.insert("mrtree", Box::new(mrtree::MRTree));
     m.insert("radial", Box::new(radial::Radial));
     m.insert("random", Box::new(random::Random));
     m.insert("rectpacking", Box::new(rectpacking::RectPacking));
+    m.insert("stress", Box::new(stress::Stress));
     m.insert("topdownpacking", Box::new(topdownpacking::TopdownPacking));
     m.insert("vertiflex", Box::new(vertiflex::VertiFlex));
     m
@@ -132,9 +136,11 @@ pub fn by_name(name: &str) -> Result<Box<dyn LayoutAlgorithm>, LayoutError> {
         "fixed" => Ok(Box::new(fixed::Fixed)),
         "force" => Ok(Box::new(force::Force)),
         "layered" => Ok(Box::new(layered::Layered)),
+        "mrtree" => Ok(Box::new(mrtree::MRTree)),
         "radial" => Ok(Box::new(radial::Radial)),
         "random" => Ok(Box::new(random::Random)),
         "rectpacking" => Ok(Box::new(rectpacking::RectPacking)),
+        "stress" => Ok(Box::new(stress::Stress)),
         "topdownpacking" => Ok(Box::new(topdownpacking::TopdownPacking)),
         "vertiflex" => Ok(Box::new(vertiflex::VertiFlex)),
         other => {
