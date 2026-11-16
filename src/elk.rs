@@ -135,6 +135,10 @@ pub struct ElkLabel {
     pub x: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub y: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -148,6 +152,10 @@ pub struct ElkEdge {
     /// Layout output: the routed sections of the edge.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sections: Vec<EdgeSection>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub labels: Vec<ElkLabel>,
+    #[serde(default, skip_serializing_if = "LayoutOptions::is_empty")]
+    pub layout_options: LayoutOptions,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

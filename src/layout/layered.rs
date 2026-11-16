@@ -294,14 +294,20 @@ impl LayoutAlgorithm for Layered {
             let end = super::ports::port_anchor(&graph.children[ti], tgt)
                 .map(|(x, y)| Point { x, y })
                 .unwrap_or(end);
+            let bends = if super::routing::orthogonal(e) {
+                super::routing::orthogonal_bends(start, end)
+            } else {
+                Vec::new()
+            };
             e.sections.push(EdgeSection {
                 id: format!("{}_section", e.id),
                 start_point: start,
                 end_point: end,
-                bend_points: Vec::new(),
+                bend_points: bends,
                 incoming_shape: Some(nodes[si].id.clone()),
                 outgoing_shape: Some(nodes[ti].id.clone()),
             });
+            super::routing::place_labels(e);
         }
 
         Ok(())

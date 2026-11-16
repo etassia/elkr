@@ -273,6 +273,8 @@ fn the_geometry_algorithms_skip_unknown_edge_endpoints() {
             sources: vec!["a".to_string()],
             targets: vec!["ghost".to_string()],
             sections: Vec::new(),
+            labels: Vec::new(),
+            layout_options: Default::default(),
         }];
         layout::by_name(algorithm).unwrap().layout(&mut g).unwrap();
         assert!(
