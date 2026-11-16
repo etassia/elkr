@@ -19,7 +19,7 @@ layout change is a visible, pinned change.
 
 == Status
 
-`elkr 0.1.1` carries eleven of the fifteen algorithms ElkRb implements:
+`elkr 0.1.1` carries all fifteen of the fifteen algorithms ElkRb implements:
 
 [cols="1,2,1"]
 |===
@@ -67,7 +67,7 @@ layout change is a visible, pinned change.
 
 |Libavoid
 |"A*" pathfinding connector routing
-|planned
+|v0.1 — orthogonal A* over the nodes inflated by libavoid.routingPadding (10), segment and bend penalties, visibility simplification; faithful to elkrb, whose paths start inside their own obstacle and so fall back to the direct route
 
 |VertiFlex
 |vertical flexible column layout
@@ -75,15 +75,15 @@ layout change is a visible, pinned change.
 
 |DISCO
 |disconnected component layout
-|planned
+|v0.1 — BFS components, each laid independently by disco.componentAlgorithm (layered), arranged row, column or grid with disco.componentSpacing 20; edges re-route on the final positions
 
 |SPOrE Overlap
 |overlap removal optimization
-|planned
+|v0.1 — overlapping pairs (inflated by half of spore.nodeSpacing 10) push apart along the dominant axis until clean or spore.maxIterations 50; the knobs parse as numbers, where elkrb reads raw strings
 
 |SPOrE Compaction
 |whitespace compaction
-|planned
+|v0.1 — sweeps along spore.compactionDirection (both), each node pulled to the boundary its overlapping predecessors allow plus spore.nodeSpacing 10; unblocked nodes ride to the origin, faithful to elkrb
 |===
 
 Also on the roadmap, in pipeline order: hierarchical (nested) graphs, port
